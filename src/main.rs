@@ -6,6 +6,7 @@ use std::{
 };
 
 use image::{DynamicImage, GenericImageView, Rgba};
+use rayon::prelude::*;
 
 struct Vectors {
     size: usize,
@@ -146,34 +147,24 @@ impl Vectors {
 fn main() {
     let all_timer = Instant::now();
 
-    let io_timer = Instant::now();
     let dir = std::fs::read_dir("./dataset").unwrap();
-    let mut imgs = Vec::new() as Vec<(String, DynamicImage)>;
-    for img in dir {
-        let now = Instant::now();
-        let img_path = img.unwrap().path().display().to_string();
-        let img = image::open(&img_path).unwrap();
-        println!("Loaded Image: {:.2?} {}", now.elapsed(), img_path);
-        imgs.push((img_path, img));
-    }
-    println!("All io: {:.2?}", io_timer.elapsed());
-
-    let process_timer = Instant::now();
     let mut threads = vec![] as Vec<JoinHandle<()>>;
-    for (img_path, img) in imgs {
-        threads.push(thread::spawn(move || {
-            let now = Instant::now();
-            Vectors::get_hsv_feature_vector(&img);
-            let elapsed = now.elapsed();
-            println!("Processed Image: {:.2?} {}", now.elapsed(), img_path);
-        }));
-    }
 
-    let res = Vec::new() as Vec<(String, Vectors)>;
-    for thread in threads {
-        let a = thread.join().unwrap();
-    }
-    println!("All process: {:.2?}", process_timer.elapsed());
+    let res = dir
+        .map(|file| file.unwrap().path().display().to_string())
+        .collect::<Vec<String>>()
+        .par_iter()
+        .map(|img_path| {
+            let now = Instant::now();
+
+            let img = image::open(&img_path).unwrap();
+            let res = Vectors::get_hsv_feature_vector(&img);
+
+            let elapsed = now.elapsed();
+            // println!("Processed Image in: {:.2?} {}", now.elapsed(), img_path);
+            ()
+        })
+        .collect::<Vec<()>>();
 
     println!("Total time elapsed: {:.2?}", all_timer.elapsed());
 }
