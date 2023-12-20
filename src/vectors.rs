@@ -1,15 +1,16 @@
+#![allow(unused)]
 use image::DynamicImage;
 
 use image::GenericImageView;
 use image::Rgba;
 
-pub(crate) struct Vectors {
-    pub(crate) size: usize,
-    pub(crate) dimension: usize,
-    pub(crate) buffer: Vec<f64>,
+pub struct Vectors {
+    pub size: usize,
+    pub dimension: usize,
+    pub buffer: Vec<f64>,
 }
 
-pub(crate) fn bin_h(h: f64) -> usize {
+pub fn bin_h(h: f64) -> usize {
     let mut r = 1;
 
     if h > 25.0 {
@@ -41,7 +42,7 @@ pub(crate) fn bin_h(h: f64) -> usize {
     return r;
 }
 
-pub(crate) fn bin_s(s: f64) -> usize {
+pub fn bin_s(s: f64) -> usize {
     let mut r = 0;
 
     if s > 0.2 {
@@ -54,7 +55,7 @@ pub(crate) fn bin_s(s: f64) -> usize {
     r
 }
 
-pub(crate) fn bin_v(v: f64) -> usize {
+pub fn bin_v(v: f64) -> usize {
     let mut r = 0;
 
     if v > 0.2 {
@@ -68,7 +69,7 @@ pub(crate) fn bin_v(v: f64) -> usize {
 }
 
 impl Vectors {
-    pub(crate) fn new(size: usize, dimension: usize) -> Vectors {
+    pub fn new(size: usize, dimension: usize) -> Vectors {
         Vectors {
             size,
             dimension,
@@ -76,7 +77,7 @@ impl Vectors {
         }
     }
 
-    pub(crate) fn get_average_cosine_similarity(a: &Vectors, b: &Vectors) -> f64 {
+    pub fn get_average_cosine_similarity(a: &Vectors, b: &Vectors) -> f64 {
         let size = a.size;
         let dimension = a.dimension;
         if size != b.size || dimension != b.dimension {
@@ -98,7 +99,7 @@ impl Vectors {
         res / size as f64
     }
 
-    pub(crate) fn pixel_to_bin(p: Rgba<u8>) -> usize {
+    pub fn pixel_to_bin(p: Rgba<u8>) -> usize {
         let [r, g, b, _] = p.0;
 
         let r = (r as f64) / 255.0;
@@ -125,7 +126,7 @@ impl Vectors {
         24 * bin_v(v) + 8 * bin_s(s) + bin_h(h)
     }
 
-    pub(crate) fn get_hsv_feature_vector(img: &DynamicImage) -> Vectors {
+    pub fn get_hsv_feature_vector(img: &DynamicImage) -> Vectors {
         let mut vecs = Vectors::new(1, 72);
 
         for i in 0..img.height() {

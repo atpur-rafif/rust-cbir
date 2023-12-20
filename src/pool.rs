@@ -1,15 +1,14 @@
-use std::fmt::Debug;
-use std::marker::Send;
-use std::sync::mpsc::{self, Sender, TryRecvError};
-use std::thread;
+#![allow(unused)]
 
-use rayon::iter::Empty;
+use std::marker::Send;
+use std::sync::mpsc::{self, Sender};
+use std::thread;
 
 pub fn thread_pool<T: Send + 'static, U: Send + 'static>(
     mut values: Vec<T>,
     functor: fn(T) -> U,
 ) -> Vec<U> {
-    let mut max_thread: usize = thread::available_parallelism().unwrap().into();
+    let max_thread: usize = thread::available_parallelism().unwrap().into();
     let size = values.len();
     let (tx, rx) = mpsc::channel::<U>();
 
