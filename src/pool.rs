@@ -31,17 +31,14 @@ pub fn thread_pool<T: Send + 'static, U: Send + 'static>(
     }
 
     let mut finished = 0;
-    while finished < size {
-        match rx.try_recv() {
-            Ok(v) => {
-                res.push(v);
-                match values.pop() {
-                    Some(v) => inner_spawn(v, functor, tx.clone()),
-                    None => {}
-                }
-                finished += 1;
-            }
-            Err(e) => {}
+    for r in rx {
+        res.push(r);
+        finished += 1;
+        if finished == size {
+            break;
+        } else if let Some(value) = values.pop() {
+            inner_spawn(value, functor, tx.clone());
+            started += 1;
         }
     }
 
